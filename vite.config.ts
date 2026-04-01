@@ -3,7 +3,7 @@ import tailwindcss from "@tailwindcss/vite";
 import react from "@vitejs/plugin-react";
 import path from "node:path";
 import { defineConfig } from "vite";
-import { getManusVitePlugins } from "./build/vite.manus";
+import { getManusVitePlugins } from "./config/vite.manus";
 
 const plugins = [react(), tailwindcss(), jsxLocPlugin(), ...getManusVitePlugins()];
 

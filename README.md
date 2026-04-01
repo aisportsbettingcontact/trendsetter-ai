@@ -110,7 +110,7 @@ To keep that boundary clean:
 
 - Provider-specific auth now lives behind `server/integrations/manus/auth/sdk.ts` and `server/integrations/manus/auth/oauth.ts`
 - Forge-specific service wiring now lives behind `server/integrations/manus/forge.ts`
-- Manus Vite runtime hooks are isolated in `build/vite.manus.ts`
+- Manus Vite runtime hooks are isolated in `config/vite.manus.ts`
 - Manus runtime and debug collector behavior are controlled by env flags instead of being implicitly required
 
 That means:
