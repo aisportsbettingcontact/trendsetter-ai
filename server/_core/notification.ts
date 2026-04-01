@@ -1,5 +1,9 @@
 import { TRPCError } from "@trpc/server";
-import { ENV } from "./env";
+import {
+  buildForgeAuthHeaders,
+  buildForgeUrl,
+  getOptionalForgeConfig,
+} from "../integrations/manus/forge";
 
 export type NotificationPayload = {
   title: string;
@@ -12,16 +16,6 @@ const CONTENT_MAX_LENGTH = 20000;
 const trimValue = (value: string): string => value.trim();
 const isNonEmptyString = (value: unknown): value is string =>
   typeof value === "string" && value.trim().length > 0;
-
-const buildEndpointUrl = (baseUrl: string): string => {
-  const normalizedBase = baseUrl.endsWith("/")
-    ? baseUrl
-    : `${baseUrl}/`;
-  return new URL(
-    "webdevtoken.v1.WebDevService/SendNotification",
-    normalizedBase
-  ).toString();
-};
 
 const validatePayload = (input: NotificationPayload): NotificationPayload => {
   if (!isNonEmptyString(input.title)) {
@@ -67,32 +61,32 @@ export async function notifyOwner(
   payload: NotificationPayload
 ): Promise<boolean> {
   const { title, content } = validatePayload(payload);
+  const forgeConfig = getOptionalForgeConfig();
 
-  if (!ENV.forgeApiUrl) {
+  if (!forgeConfig?.baseUrl) {
     throw new TRPCError({
       code: "INTERNAL_SERVER_ERROR",
       message: "Notification service URL is not configured.",
     });
   }
 
-  if (!ENV.forgeApiKey) {
+  if (!forgeConfig.apiKey) {
     throw new TRPCError({
       code: "INTERNAL_SERVER_ERROR",
       message: "Notification service API key is not configured.",
     });
   }
 
-  const endpoint = buildEndpointUrl(ENV.forgeApiUrl);
+  const endpoint = buildForgeUrl("webdevtoken.v1.WebDevService/SendNotification");
 
   try {
     const response = await fetch(endpoint, {
       method: "POST",
-      headers: {
+      headers: buildForgeAuthHeaders({
         accept: "application/json",
-        authorization: `Bearer ${ENV.forgeApiKey}`,
         "content-type": "application/json",
         "connect-protocol-version": "1",
-      },
+      }),
       body: JSON.stringify({ title, content }),
     });
 

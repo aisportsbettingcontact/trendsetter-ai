@@ -1,21 +1,13 @@
-// Preconfigured storage helpers for Manus WebDev templates
-// Uses the Biz-provided storage proxy (Authorization: Bearer <token>)
-
-import { ENV } from './_core/env';
+import {
+  buildForgeAuthHeaders,
+  buildForgeUrl,
+  getForgeConfig,
+} from "./integrations/manus/forge";
 
 type StorageConfig = { baseUrl: string; apiKey: string };
 
 function getStorageConfig(): StorageConfig {
-  const baseUrl = ENV.forgeApiUrl;
-  const apiKey = ENV.forgeApiKey;
-
-  if (!baseUrl || !apiKey) {
-    throw new Error(
-      "Storage proxy credentials missing: set BUILT_IN_FORGE_API_URL and BUILT_IN_FORGE_API_KEY"
-    );
-  }
-
-  return { baseUrl: baseUrl.replace(/\/+$/, ""), apiKey };
+  return getForgeConfig();
 }
 
 function buildUploadUrl(baseUrl: string, relKey: string): URL {
@@ -25,18 +17,15 @@ function buildUploadUrl(baseUrl: string, relKey: string): URL {
 }
 
 async function buildDownloadUrl(
-  baseUrl: string,
+  _baseUrl: string,
   relKey: string,
-  apiKey: string
+  _apiKey: string
 ): Promise<string> {
-  const downloadApiUrl = new URL(
-    "v1/storage/downloadUrl",
-    ensureTrailingSlash(baseUrl)
-  );
+  const downloadApiUrl = new URL(buildForgeUrl("v1/storage/downloadUrl"));
   downloadApiUrl.searchParams.set("path", normalizeKey(relKey));
   const response = await fetch(downloadApiUrl, {
     method: "GET",
-    headers: buildAuthHeaders(apiKey),
+    headers: buildAuthHeaders(),
   });
   return (await response.json()).url;
 }
@@ -63,8 +52,8 @@ function toFormData(
   return form;
 }
 
-function buildAuthHeaders(apiKey: string): HeadersInit {
-  return { Authorization: `Bearer ${apiKey}` };
+function buildAuthHeaders(): HeadersInit {
+  return buildForgeAuthHeaders();
 }
 
 export async function storagePut(
@@ -78,7 +67,7 @@ export async function storagePut(
   const formData = toFormData(data, contentType, key.split("/").pop() ?? key);
   const response = await fetch(uploadUrl, {
     method: "POST",
-    headers: buildAuthHeaders(apiKey),
+    headers: buildAuthHeaders(),
     body: formData,
   });
 

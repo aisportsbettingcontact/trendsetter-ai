@@ -1,4 +1,9 @@
 import { ENV } from "./env";
+import {
+  buildForgeAuthHeaders,
+  buildForgeUrl,
+  getOptionalForgeConfig,
+} from "../integrations/manus/forge";
 
 export type Role = "system" | "user" | "assistant" | "tool" | "function";
 
@@ -210,8 +215,8 @@ const normalizeToolChoice = (
 };
 
 const resolveApiUrl = () =>
-  ENV.forgeApiUrl && ENV.forgeApiUrl.trim().length > 0
-    ? `${ENV.forgeApiUrl.replace(/\/$/, "")}/v1/chat/completions`
+  getOptionalForgeConfig()
+    ? buildForgeUrl("v1/chat/completions")
     : "https://forge.manus.im/v1/chat/completions";
 
 const assertApiKey = () => {
@@ -314,10 +319,9 @@ export async function invokeLLM(params: InvokeParams): Promise<InvokeResult> {
 
   const response = await fetch(resolveApiUrl(), {
     method: "POST",
-    headers: {
+    headers: buildForgeAuthHeaders({
       "content-type": "application/json",
-      authorization: `Bearer ${ENV.forgeApiKey}`,
-    },
+    }),
     body: JSON.stringify(payload),
   });
 
