@@ -60,6 +60,21 @@ GitHub Actions runs the same checks automatically on pushes to `main` and on pul
 
 There is also a separate preview validation workflow that runs on pull requests, non-`main` pushes, and manual dispatch. It builds the app and uploads the `dist` folder as a preview artifact.
 
+## Branch Strategy
+
+Use a small, predictable branch model:
+
+- `main`: production branch, the only branch Manus should deploy to production
+- `staging`: optional integration branch for release candidates and shared QA
+- short-lived feature branches: for focused work and preview validation
+
+Recommended flow:
+
+1. develop in a short-lived branch
+2. open a pull request into `main` or `staging`
+3. let preview validation run on the branch/PR
+4. merge into `main` only when ready for production deployment
+
 ## Deployment Contract
 
 This repo is designed to be GitHub-first and hosting-agnostic:
@@ -121,6 +136,17 @@ To keep Manus deployment seamless:
 - deploy from `main`
 - set the environment variables in Manus instead of hardcoding them in code
 - keep all code changes flowing through GitHub commits
+
+Suggested Manus settings:
+
+- Production branch: `main`
+- Install command: `corepack pnpm install --frozen-lockfile`
+- Build command: `corepack pnpm build`
+- Start command: `corepack pnpm start`
+- Node version: `22`
+- Required envs: `JWT_SECRET`, `VITE_APP_ID`, `VITE_OAUTH_PORTAL_URL`, `OAUTH_SERVER_URL`
+- Optional provider envs: `BUILT_IN_FORGE_API_URL`, `BUILT_IN_FORGE_API_KEY`
+- Recommended debug setting in production: `ENABLE_MANUS_DEBUG_COLLECTOR=false`
 
 If Manus is the active runtime provider, enable:
 
