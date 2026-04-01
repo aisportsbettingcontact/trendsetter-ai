@@ -1,6 +1,15 @@
-import { describe, expect, it } from "vitest";
-import { getDbStats, executeTrendsQuery, getMlbDb } from "./mlbDb";
+import { beforeAll, describe, expect, it } from "vitest";
+import {
+  ensureDbReady,
+  executeTrendsQuery,
+  getDbStats,
+  getMlbDb,
+} from "./mlbDb";
 import { extractTeamFromText, extractSecondTeamFromText, __testUtils } from "./trendsRouter";
+
+beforeAll(async () => {
+  await ensureDbReady();
+});
 
 // ─── Team Extraction Tests ─────────────────────────────────────────────────────
 describe("extractTeamFromText - regex fallback", () => {
