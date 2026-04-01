@@ -140,6 +140,7 @@ To keep Manus deployment seamless:
 Suggested Manus settings:
 
 - Production branch: `main`
+- Preview or staging branch: `staging`
 - Install command: `corepack pnpm install --frozen-lockfile`
 - Build command: `corepack pnpm build`
 - Start command: `corepack pnpm start`
@@ -157,3 +158,57 @@ For local development, you can leave:
 - `ENABLE_MANUS_DEBUG_COLLECTOR=false`
 
 unless you explicitly want the extra debug collector.
+
+## Deployment Checklist
+
+Before turning on Manus production deploys, verify:
+
+1. GitHub
+- `main` CI is green
+- `staging` Preview Validation is green
+- branch protections are enabled for `main`
+- direct force-pushes to `main` are restricted after initial setup
+
+2. Manus production
+- connected repo: `aisportsbettingcontact/trendsetter-ai`
+- production branch: `main`
+- install command: `corepack pnpm install --frozen-lockfile`
+- build command: `corepack pnpm build`
+- start command: `corepack pnpm start`
+- Node version: `22`
+
+3. Manus preview or staging
+- preview branch: `staging`
+- same install/build/start commands as production
+- separate environment values if staging needs different auth or analytics targets
+
+4. Secrets and env vars
+- `JWT_SECRET`
+- `VITE_APP_ID`
+- `VITE_OAUTH_PORTAL_URL`
+- `OAUTH_SERVER_URL`
+- `DATABASE_URL` if MySQL-backed auth persistence is required
+- `BUILT_IN_FORGE_API_URL` and `BUILT_IN_FORGE_API_KEY` if Manus/Forge services are in use
+- `VITE_ANALYTICS_ENDPOINT` and `VITE_ANALYTICS_WEBSITE_ID` only if analytics should be enabled
+
+5. Smoke tests after deploy
+- home page loads
+- sample trends query returns results
+- auth redirect works if auth is enabled
+- preview artifact and Manus preview URL match expected branch content
+
+## Rollback Procedure
+
+Use this if a bad deploy reaches Manus production:
+
+1. identify the last known good commit on `main`
+2. revert the bad commit in Git
+3. push the revert to `main`
+4. allow CI to pass
+5. let Manus redeploy from the reverted `main`
+
+Recommended rollback rule:
+
+- prefer `git revert` over force-pushing rewritten history on `main`
+
+That keeps GitHub, Codex, and Manus aligned on the same deployment timeline.
