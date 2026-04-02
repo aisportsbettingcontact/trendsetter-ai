@@ -149,6 +149,34 @@ Suggested Manus settings:
 - Optional provider envs: `BUILT_IN_FORGE_API_URL`, `BUILT_IN_FORGE_API_KEY`
 - Recommended debug setting in production: `ENABLE_MANUS_DEBUG_COLLECTOR=false`
 
+Suggested Manus project layout:
+
+1. Production project
+- branch: `main`
+- auto-deploy: enabled
+- public URL: production domain only
+- secrets: production values only
+
+2. Preview or staging project
+- branch: `staging`
+- auto-deploy: enabled
+- preview URL: staging domain/subdomain
+- secrets: staging-safe values where they differ from production
+
+## Branch Protection
+
+`main` is intended to stay protected with:
+
+- required passing `CI` check
+- pull requests required before merge
+- 1 approving review required
+- stale review dismissal enabled
+- conversation resolution required
+- linear history required
+- force pushes disabled
+- deletions disabled
+- protections enforced for admins
+
 If Manus is the active runtime provider, enable:
 
 - `ENABLE_MANUS_RUNTIME=true`
