@@ -42,7 +42,7 @@ jobs:
     timeout-minutes: 15
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       # The port has to agree in three places: this repo's two declarations and
       # the target port on the Railway domain. Only the first two are checkable
